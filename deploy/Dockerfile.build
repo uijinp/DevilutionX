@@ -1,0 +1,14 @@
+# Emscripten 빌드 전용. 로컬(맥) 도커에서 돌리고 산출물만 dist/ 로 꺼낸다.
+#   docker build -f deploy/Dockerfile.build --target out --output type=local,dest=dist .
+# 서버에서 빌드하지 않는다 — 서버(4C/14G)가 견디지 못한다.
+# emsdk 공식 이미지는 amd64 만 있다. 애플 실리콘에서는 로제타로 돈다(경고 억제용 명시).
+FROM --platform=linux/amd64 emscripten/emsdk:4.0.15 AS build
+WORKDIR /src
+COPY . .
+RUN emcmake cmake -S . -B build-em -DCMAKE_BUILD_TYPE=Release \
+ && cmake --build build-em -j"$(nproc)"
+
+FROM scratch AS out
+COPY --from=build /src/build-em/index.html /src/build-em/file-manager.js \
+                  /src/build-em/devilutionx.js /src/build-em/devilutionx.wasm \
+                  /src/build-em/devilutionx.data /

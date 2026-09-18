@@ -475,3 +475,6 @@ uwp-project/Assets/ui_art
 /tmp/
 /compile_commands.json
 /tools/tmp
+
+# 로컬 웹 빌드 산출물 (deploy/deploy.sh)
+/dist/
