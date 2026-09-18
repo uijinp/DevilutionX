@@ -3,10 +3,14 @@
 # 서버에서 빌드하지 않는다 — 서버(4C/14G)가 견디지 못한다.
 # emsdk 공식 이미지는 amd64 만 있다. 애플 실리콘에서는 로제타로 돈다(경고 억제용 명시).
 FROM --platform=linux/amd64 emscripten/emsdk:4.0.15 AS build
+# gettext(msgfmt) 가 없으면 Translations/*.po 가 .gmo 로 컴파일되지 않아 언어를 바꿔도 영어로 남는다.
+RUN apt-get update && apt-get install -y --no-install-recommends gettext && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 COPY . .
+# JOBS: 병렬 컴파일 수. 기본은 코어의 절반 — 맥이 버벅이지 않게. deploy.sh 가 넘긴다.
+ARG JOBS=
 RUN emcmake cmake -S . -B build-em -DCMAKE_BUILD_TYPE=Release \
- && cmake --build build-em -j"$(nproc)"
+ && cmake --build build-em -j"${JOBS:-$(( $(nproc) / 2 > 0 ? $(nproc) / 2 : 1 ))}"
 
 FROM scratch AS out
 COPY --from=build /src/build-em/index.html /src/build-em/file-manager.js \
