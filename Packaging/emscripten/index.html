@@ -23,16 +23,24 @@
 			text-align: center;
 		}
 
-		div.emscripten_border {
-			border: 1px solid black;
-			margin: 20px auto;
-			width: min(90vw, calc((100vh - 200px) * 4 / 3));
-			max-width: 1280px;
-			aspect-ratio: 4 / 3;
-			display: flex;
-			justify-content: center;
-			align-items: center;
+		/* 캔버스를 화면에 꽉 채운다. 상단 36px 바(상태·버튼)만 남기고 4:3 비율로 최대 크기. */
+		:root { --topbar: 36px; }
+		body { background: #000; overflow: hidden; }
+		#topbar {
+			position: fixed; top: 0; left: 0; right: 0; height: var(--topbar);
+			display: flex; align-items: center; gap: 8px; padding: 0 10px; box-sizing: border-box;
+			background: #111; color: #ccc; font-size: 13px; z-index: 1000;
 		}
+		#topbar .spacer { flex: 1; }
+		#topbar button { cursor: pointer; }
+		div.emscripten_border {
+			position: fixed; top: var(--topbar); left: 50%; transform: translateX(-50%);
+			width: min(100vw, calc((100vh - var(--topbar)) * 4 / 3));
+			height: calc(100vh - var(--topbar));
+			display: flex; justify-content: center; align-items: center;
+			background: #000;
+		}
+		canvas.emscripten:fullscreen { width: 100vw; height: 100vh; object-fit: contain; background: #000; }
 
 		/* the canvas *must not* have any border or padding, or mouse coords will be wrong */
 		canvas.emscripten {
@@ -160,13 +168,7 @@
 		}
 
 		/* File Manager Styles */
-		#fileManagerBtn {
-			position: fixed;
-			top: 20px;
-			right: 20px;
-			cursor: pointer;
-			z-index: 1000;
-		}
+		#fileManagerBtn { cursor: pointer; }
 
 		#fileManagerModal {
 			display: none;
@@ -259,16 +261,16 @@
 			display: none;
 		}
 
-		@media screen and (max-width: 700px) {
-			div.emscripten_border {
-				width: min(calc(100vw - 40px), calc((100vh - 200px) * 4 / 3));
-			}
-		}
 	</style>
 </head>
 
 <body>
-	<button id="fileManagerBtn" title="File Manager">File Manager</button>
+	<div id="topbar">
+		<span id="status">Downloading...</span>
+		<span class="spacer"></span>
+		<button id="fullscreenBtn" title="전체화면 (Esc 로 해제)">전체화면</button>
+		<button id="fileManagerBtn" title="File Manager">File Manager</button>
+	</div>
 	<div id="fileManagerModal">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -306,17 +308,13 @@
 		</div>
 	</div>
 
-	<div class="spinner" id='spinner'></div>
-	<div class="emscripten" id="status">Downloading...</div>
-
-	<div class="emscripten">
-		<progress value="0" max="100" id="progress" hidden=1></progress>
-	</div>
+	<div class="spinner" id='spinner' style="display:none"></div>
+	<progress value="0" max="100" id="progress" hidden=1 style="display:none"></progress>
 
 	<div class="emscripten_border">
 		<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
 	</div>
-	<textarea id="output" rows="8"></textarea>
+	<textarea id="output" rows="8" style="display:none"></textarea>
 
 	<script type='text/javascript'>
 		var statusElement = document.getElementById('status');
@@ -391,6 +389,14 @@
 				if (text) Module.printErr('[post-exception status] ' + text);
 			};
 		};
+	</script>
+	<script type='text/javascript'>
+		document.getElementById('fullscreenBtn').addEventListener('click', function () {
+			var c = document.getElementById('canvas');
+			if (document.fullscreenElement) { document.exitFullscreen(); return; }
+			(c.requestFullscreen || c.webkitRequestFullscreen).call(c);
+			c.focus();
+		});
 	</script>
 	<script type='text/javascript' src="file-manager.js?v=__BUILD_ID__"></script>
 	<script async type="text/javascript" src="devilutionx.js?v=__BUILD_ID__"></script>
