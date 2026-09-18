@@ -60,7 +60,10 @@ Module['preRun'].push(function() {
 // Load MPQ files from the server directory
 Module['preRun'].push(function() {
   // List of MPQ files to try loading (in priority order)
-  var mpqFiles = [
+  // 서버에 있는 것만 실린다(없으면 404 → 조용히 건너뜀). DIABDAT.MPQ 는 인증 뒤에서만 제공되는 개인 사본.
+  // index.html 에서 Module.mpqFiles 로 덮어쓸 수 있다(재빌드 없이 목록 변경).
+  var mpqFiles = Module['mpqFiles'] || [
+    'DIABDAT.MPQ',
     'spawn.mpq',
     'fonts.mpq',
   ];

@@ -42,7 +42,14 @@ echo "▸ 게임 데이터 (없을 때만 받는다)"
 chmod 644 dist/*
 
 echo "▸ 업로드 → $HOST:$REMOTE (deploy/ 와 dist/ 만)"
-ssh "$HOST" "mkdir -p $REMOTE"
+ssh "$HOST" "mkdir -p $REMOTE $REMOTE/private"
+# 정품 DIABDAT.MPQ 는 저장소 밖(../DIABDAT.MPQ)에 두고, 서버에 없을 때만 올린다. 프록시 basic_auth 뒤에서만 제공된다.
+if [ -s ../DIABDAT.MPQ ]; then
+  if ! ssh "$HOST" "[ -s $REMOTE/private/DIABDAT.MPQ ]"; then
+    echo "  DIABDAT.MPQ 전송 (517MB, 한 번만)"
+    rsync -a --progress ../DIABDAT.MPQ "$HOST:$REMOTE/private/DIABDAT.MPQ"
+  fi
+fi
 rsync -az --delete deploy/ "$HOST:$REMOTE/deploy/"
 rsync -az --delete dist/   "$HOST:$REMOTE/dist/"
 
@@ -58,6 +65,7 @@ ssh "$HOST" "set -e
     -l status.port=$PORT \
     -l status.label='DevilutionX 웹' \
     -l status.path=/healthz \
+    -v $REMOTE/private:/private:ro \
     $NAME:latest"
 
 echo "▸ 서버 안 확인"
@@ -80,14 +88,21 @@ ssh "$HOST" "set -e
   curl -sI http://127.0.0.1:$PORT/ | grep -qi 'cross-origin-embedder-policy: require-corp' || { echo '실패 — COEP 헤더 없음'; exit 1; }"
 
 echo "▸ 공개 URL 확인"
-code=$(curl -s -m 25 -o /dev/null -w '%{http_code}' "$URL/")
+# 프록시가 basic_auth 로 잠겨 있다. DIABLO2_AUTH=user:pass 가 있으면 그걸로, 없으면 401 까지만 확인한다.
+AUTH=(); [ -n "${DIABLO2_AUTH:-}" ] && AUTH=(-u "$DIABLO2_AUTH")
+code=$(curl -s -m 25 -o /dev/null -w '%{http_code}' "${AUTH[@]}" "$URL/")
 echo "$URL/ → $code"
+if [ "$code" = "401" ] && [ ${#AUTH[@]} -eq 0 ]; then
+  echo "  인증 걸림(정상). 내용까지 대조하려면 DIABLO2_AUTH=user:pass 로 실행."
+  ssh "$HOST" "curl -s http://127.0.0.1:$PORT/ | grep -q '$BUILD_ID'" || { echo "실패 — 서버 index.html 이 이번 빌드가 아니다"; exit 1; }
+  echo "완료 → $URL"; exit 0
+fi
 [ "$code" = "200" ] || { echo "실패 — 프록시 규칙(statusServer/proxy/sites/diablo2.caddy)과 Cloudflare 터널 Public Hostname 을 확인할 것"; exit 1; }
 # CDN 이 옛 파일을 주지 않는지: 공개 index.html 이 이번 BUILD_ID 를 담고, 그 ID 로 받은 js 가 서버 것과 같은지 본다.
-curl -s -m 25 "$URL/" | grep -q "$BUILD_ID" || { echo "실패 — 공개 index.html 이 이번 빌드가 아니다 (CDN 캐시?)"; exit 1; }
-pub=$(curl -s -m 60 "$URL/devilutionx.js?v=$BUILD_ID" | shasum -a 256 | cut -c1-16)
+curl -s -m 25 "${AUTH[@]}" "$URL/" | grep -q "$BUILD_ID" || { echo "실패 — 공개 index.html 이 이번 빌드가 아니다 (CDN 캐시?)"; exit 1; }
+pub=$(curl -s -m 60 "${AUTH[@]}" "$URL/devilutionx.js?v=$BUILD_ID" | shasum -a 256 | cut -c1-16)
 loc=$(shasum -a 256 dist/devilutionx.js | cut -c1-16)
 [ "$pub" = "$loc" ] || { echo "실패 — 공개 devilutionx.js($pub) ≠ 로컬($loc)"; exit 1; }
 echo "  공개 js 해시 일치 ($loc)"
-curl -sI -m 25 "$URL/" | grep -qi 'cross-origin-embedder-policy' || echo "경고 — 공개 URL 에 COEP 헤더가 없다. 게임이 뜨지 않으면 이것부터 본다."
+curl -sI -m 25 "${AUTH[@]}" "$URL/" | grep -qi 'cross-origin-embedder-policy' || echo "경고 — 공개 URL 에 COEP 헤더가 없다. 게임이 뜨지 않으면 이것부터 본다."
 echo "완료 → $URL"
