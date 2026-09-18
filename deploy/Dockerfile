@@ -8,8 +8,8 @@ RUN emcmake cmake -S . -B build-em -DCMAKE_BUILD_TYPE=Release \
 
 # 셰어웨어 데이터(spawn.mpq)와 한국어 글꼴(fonts.mpq)은 공식 배포본에서 받는다.
 FROM alpine:3.20 AS assets
-ADD https://github.com/diasurgical/devilutionx-assets/releases/download/v2/spawn.mpq /out/spawn.mpq
-ADD https://github.com/diasurgical/devilutionx-assets/releases/latest/download/fonts.mpq /out/fonts.mpq
+ADD --chmod=644 https://github.com/diasurgical/devilutionx-assets/releases/download/v2/spawn.mpq /out/spawn.mpq
+ADD --chmod=644 https://github.com/diasurgical/devilutionx-assets/releases/latest/download/fonts.mpq /out/fonts.mpq
 
 FROM nginx:1.27-alpine
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
