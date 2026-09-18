@@ -1,5 +1,5 @@
 # HANDOFF — DevilutionX 홈서버 웹 배포
-> 최종 갱신: 2026-09-18 21:40 / by Claude Code
+> 최종 갱신: 2026-09-18 22:30 / by Claude Code
 
 ## 목표
 diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-web`)해서
@@ -13,7 +13,9 @@ diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-w
 - [x] 엣지 프록시 규칙 `statusServer/proxy/sites/diablo2.caddy` 작성
 - [x] 배포 완료. https://diablo2.honeyloved.com 에서 인트로 → 메인 메뉴(Shareware)까지 헤드리스 Chromium 으로 확인, 콘솔 오류 0
 - [x] 프록시 규칙 반영(`deploy-proxy.sh`), 상태 페이지 라벨 등록
-- [ ] **← 다음 작업**: 사용자가 실제 브라우저로 플레이(한글 설정 시 fonts.mpq 글꼴 표시, 저장 후 새로고침해 IDBFS 복원) 확인
+- [x] 한국어 번역 동작 확인 (gettext 설치 → ko.gmo 포함, 헤드리스에서 메뉴 한글 렌더 확인)
+- [x] CDN 캐시 무력화: index.html 의 `__BUILD_ID__` 를 deploy.sh 가 치환, js/wasm/data 는 `?v=` 로 요청
+- [ ] **← 다음 작업**: 사용자가 실제 브라우저로 플레이(저장 후 새로고침해 IDBFS 복원) 확인
 - [ ] 확장 아이디어: `Packaging/emscripten/index.html` UI 한글화·모바일 터치, `mods/` 로 밸런스 모드, 정품 DIABDAT.MPQ 파일 매니저 업로드 안내
 
 ## 핵심 결정
@@ -29,6 +31,11 @@ diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-w
 - SDL2 가 `USE_PTHREADS=1` 이라 SharedArrayBuffer 필요 → nginx 에서 COOP/COEP 헤더를 항상 붙인다. 이 헤더가 Cloudflare 를 통과해 공개 URL 에서도 보여야 한다.
 
 ## 주의사항 / 실패한 시도
+- **번역이 안 먹으면 .gmo 부터.** emsdk 이미지에 gettext 가 없어 `Translations/*.po` 가 컴파일되지 않았다. 지금은 Dockerfile.build 가 gettext 를 설치한다. 확인: `grep -o 'ko.gmo' dist/devilutionx.js`.
+- **Cloudflare 가 js/wasm 을 4시간 캐시한다.** 재배포 후 옛 파일이 계속 나온 원인. `?v=BUILD_ID` 로 해결. deploy.sh 가 공개 js 해시까지 대조한다.
+- **`dist/` 가 도커 컨텍스트에 들어가면 CMake 가 실패한다.** 업스트림 CMakeLists 가 `dist/` 를 소스 배포판으로 인식(`add_subdirectory(dist)`). `.dockerignore` 에 `dist` 있어야 한다.
+- 로컬 빌드 CPU: 기본 `-j` 를 코어 절반으로. `JOBS=2 ./deploy/deploy.sh` 로 더 낮출 수 있다.
+- deploy.sh 를 `| tail` 로 호출하면 실패가 가려진다. 종료 코드를 보려면 파이프 없이 돌리거나 `set -o pipefail`.
 - **서버에서 빌드하지 말 것.** 첫 배포는 서버 도커 안에서 빌드했는데 사용자가 "서버가 못 견딘다"고 중단. 이후 로컬 빌드로 전환.
 - `ADD <url>` 로 받은 mpq 는 mode 600 → nginx 403. 지금은 `deploy.sh` 가 curl 로 받고 `chmod 644` 한다.
 - nginx `server{}` 안에 `types { application/wasm wasm; }` 를 쓰면 기본 MIME 표 전체가 덮여 index.html 이 octet-stream 이 된다. nginx 1.27 은 wasm 을 기본 포함하므로 쓰지 않는다.
