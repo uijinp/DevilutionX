@@ -166,6 +166,7 @@ set(devilutionx_assets
   lua/mods/clock/init.lua
   "lua/mods/Floating Numbers - Damage/init.lua"
   "lua/mods/Floating Numbers - XP/init.lua"
+  "lua/mods/XP x5/init.lua"
   lua/repl_prelude.lua
   plrgfx/warrior/whu/whufm.trn
   plrgfx/warrior/whu/whulm.trn

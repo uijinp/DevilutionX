@@ -1,5 +1,5 @@
 # HANDOFF — DevilutionX 홈서버 웹 배포
-> 최종 갱신: 2026-09-18 23:40 / by Claude Code
+> 최종 갱신: 2026-09-19 00:30 / by Claude Code
 
 ## 목표
 diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-web`)해서
@@ -18,7 +18,9 @@ diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-w
 - [x] 엣지 프록시 basic_auth 로 사이트 잠금 (`statusServer/proxy/sites/diablo2.caddy`, 사용자 `uijin`). `/healthz` 만 공개
 - [x] 정품 `DIABDAT.MPQ` 를 서버 `~/apps/diablo2/private/` 에 두고 `/private` 읽기 전용 볼륨으로 제공. 이미지·깃·dist 에는 없음
 - [x] MPQ 로더 재작성: Cache API 64MB 조각 저장 + 진행률 표시. 첫 접속 85초, 이후 5초 (헤드리스 실측)
-- [ ] **← 다음 작업**: 사용자가 실제 브라우저로 로그인 후 풀버전 플레이·저장 복원 확인. 문제 없으면 `Packaging/emscripten/index.html` 안내문 한글화
+- [x] 페이지 레이아웃: 캔버스가 뷰포트를 채움, 상단 바에 상태·전체화면·File Manager 버튼
+- [x] 첫 모드 `XP x5` (`assets/lua/mods/XP x5/init.lua`): OnPlayerGainExperience 에서 재진입 가드로 4배 추가 지급. `Source/options.cpp` DiscoverMods 목록과 `CMake/Assets.cmake` 에 등록. Settings → Mods 에서 켜야 한다
+- [ ] **← 다음 작업**: 사용자가 게임에서 XP x5 를 켜고 몬스터 처치 시 경험치 5배 확인(경험치 숫자 모드를 같이 켜면 두 줄로 뜬다). 문제 없으면 다음 모드/기능(던전 달리기 등)
 - [ ] 확장 아이디어: `Packaging/emscripten/index.html` UI 한글화·모바일 터치, `mods/` 로 밸런스 모드, 정품 DIABDAT.MPQ 파일 매니저 업로드 안내
 
 ## 핵심 결정
@@ -34,6 +36,8 @@ diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-w
 - SDL2 가 `USE_PTHREADS=1` 이라 SharedArrayBuffer 필요 → nginx 에서 COOP/COEP 헤더를 항상 붙인다. 이 헤더가 Cloudflare 를 통과해 공개 URL 에서도 보여야 한다.
 
 ## 주의사항 / 실패한 시도
+- **내장 모드는 `Source/options.cpp` `DiscoverMods()` 의 하드코딩 목록에 이름을 넣어야 Settings → Mods 에 뜬다.** Lua 파일과 CMake 등록만으로는 안 보인다.
+- 사용자가 basic_auth 비밀번호를 바꾼 뒤로는 `DIABLO2_AUTH` 없이 배포한다. 있으면 마지막 공개 URL 검증만 401 로 실패 표시되지만 배포 자체는 그 전에 끝난다.
 - **정품 데이터는 절대 공개 경로에 두지 않는다.** basic_auth 가 걸린 상태에서만 `/DIABDAT.MPQ` 를 제공한다. 프록시 규칙을 지우거나 열면 저작물 배포가 된다.
 - **Chromium Cache API 는 항목 하나가 ~128MB 를 넘으면 `UnknownError`.** 64·128MB 는 되고 256MB 부터 실패(실측). 그래서 64MB 조각 + manifest 로 저장한다.
 - `emscripten_pre.js` 는 `--pre-js` 로 `devilutionx.js` 에 박히므로 고치면 **재빌드** 필요. MPQ 목록만 바꿀 땐 index.html 의 `Module.mpqFiles` 로 덮어써 재빌드를 피한다.
