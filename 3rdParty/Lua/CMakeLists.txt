@@ -23,7 +23,7 @@ endif()
 
 include(FetchContent)
 FetchContent_Declare_ExcludeFromAll(Lua
-    URL https://github.com/walterschell/Lua/archive/3ed55a56eaa05c9221f40b3c07d0e908eb1067b0.tar.gz
+    URL https://codeload.github.com/walterschell/Lua/tar.gz/3ed55a56eaa05c9221f40b3c07d0e908eb1067b0  # github.com/…/archive 가 504 를 내서 최종 목적지(codeload)를 직접 쓴다. 해시는 동일.
     URL_HASH MD5=77907b8209f77c65cb681a5012f2d804
 )
 FetchContent_MakeAvailable_ExcludeFromAll(Lua)
