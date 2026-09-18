@@ -62,6 +62,7 @@ Module['preRun'].push(function() {
   // List of MPQ files to try loading (in priority order)
   var mpqFiles = [
     'spawn.mpq',
+    'fonts.mpq',
   ];
 
   // Create a promise-based loading system
