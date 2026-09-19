@@ -481,6 +481,14 @@ sol::table LuaItemModule(sol::state_view &lua)
 
 	sol::table table = lua.create_table();
 
+	// Item indices shift when other mods append rows, but mapping IDs are stable,
+	// so a mod should look its own items up by the base mapping ID it registered with.
+	LuaSetDocFn(table, "indexFromMappingId", "(mappingId: number) -> number",
+	    "Resolves a stable item mapping ID to the runtime item index used by Player:addItem. Returns -1 if unknown.",
+	    [](int32_t mappingId) -> int {
+		    const auto it = ItemMappingIdsToIndices.find(mappingId);
+		    return it == ItemMappingIdsToIndices.end() ? -1 : static_cast<int>(it->second);
+	    });
 	LuaSetDocFn(table, "addItemDataFromTsv", "(path: string, baseMappingId: number)", AddItemDataFromTsv);
 	LuaSetDocFn(table, "addUniqueItemDataFromTsv", "(path: string, baseMappingId: number)", AddUniqueItemDataFromTsv);
 

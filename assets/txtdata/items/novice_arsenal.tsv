@@ -1,0 +1,6 @@
+id	dropRate	class	equipType	cursorGraphic	itemType	uniqueBaseItem	name	shortName	minMonsterLevel	durability	minDamage	maxDamage	minArmor	maxArmor	minStrength	minMagic	minDexterity	specialEffects	miscId	spell	usable	value
+IDI_NOVICE_GREAT_SWORD	0	Weapon	Two-handed	GREAT_SWORD	Sword	NONE	Novice Great Sword	Sword	1	100	10	20	0	0	0	0	0		NONE	Null	false	3000
+IDI_NOVICE_GREAT_AXE	0	Weapon	Two-handed	GREAT_AXE	Axe	NONE	Novice Great Axe	Axe	1	75	12	30	0	0	0	0	0		NONE	Null	false	2500
+IDI_NOVICE_MAUL	0	Weapon	Two-handed	MAUL	Mace	NONE	Novice Maul	Maul	1	50	6	20	0	0	0	0	0		NONE	Null	false	900
+IDI_NOVICE_LONG_WAR_BOW	0	Weapon	Two-handed	LONG_WAR_BOW	Bow	NONE	Novice Long War Bow	Bow	1	60	1	14	0	0	0	0	0		NONE	Null	false	2000
+IDI_NOVICE_WAR_STAFF	0	Weapon	Two-handed	WAR_STAFF	Staff	NONE	Novice War Staff	Staff	1	75	8	16	0	0	0	0	0		NONE	Null	false	1500

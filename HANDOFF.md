@@ -36,6 +36,13 @@ diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-w
 - SDL2 가 `USE_PTHREADS=1` 이라 SharedArrayBuffer 필요 → nginx 에서 COOP/COEP 헤더를 항상 붙인다. 이 헤더가 Cloudflare 를 통과해 공개 URL 에서도 보여야 한다.
 
 ## 주의사항 / 실패한 시도
+- **이 저장소는 CRLF 다.** `.gitattributes` 가 `* -text`, `.editorconfig` 가 `end_of_line = crlf`. 파이썬 등으로 C++ 파일을 다시 쓰면 통째로 LF 가 되어 27줄 변경이 2,231줄 diff 가 된다. 편집 후 `git diff --numstat` 로 확인할 것. Lua 와 TSV 는 LF 가 맞다.
+- **골드를 인벤토리에 다 넣으면 안 된다.** 40칸이 전부 골드가 되면 전리품을 못 줍고, 상점이 "자리 없음"을 내고, 금고 인출 상한이 `RoomForGold()` = 0 이 되어 금고 돈을 꺼낼 수도 없다. 그래서 지갑 몫(25,000)만 넣는다.
+- **`addItem` 은 접사를 굴린다.** `SetupAllItems(onlygood=true)` 를 거치는데, `ItemType::Staff` 는 그 과정에서 주문이 붙으며 `_iMinMag` 가 되살아나 다시 못 드는 아이템이 된다. 그래서 접사 없이 기본 아이템을 주는 `Player:addBaseItem` 을 따로 만들었다. miscId 를 NONE 으로 둬도 막히지 않는다 — 판정은 itemType 이다.
+- **무기 다섯 자루는 한 번에 다 안 들어간다.** 전부 2x3 칸이고 전사의 시작 몽둥이가 한 열을 차지해 네 자루만 들어간다. 못 넣은 것은 기록하지 않고 다음 진입에 다시 시도한다.
+- **내장 모드는 `Source/options.cpp` `DiscoverMods()` 하드코딩 목록에 이름을 넣어야 뜬다.** Lua 파일과 CMake 등록만으로는 안 보인다.
+- 금고 골드는 `<PrefPath>/stash.sv` 하나뿐이라 **모든 캐릭터가 공유한다.** 지갑만 캐릭터별이다.
+- 매핑 ID 가 겹치면 `DisplayFatalErrorAndExit` 로 게임이 죽는다. Novice Arsenal 은 900000 부터 쓴다.
 - **내장 모드는 `Source/options.cpp` `DiscoverMods()` 의 하드코딩 목록에 이름을 넣어야 Settings → Mods 에 뜬다.** Lua 파일과 CMake 등록만으로는 안 보인다.
 - 사용자가 basic_auth 비밀번호를 바꾼 뒤로는 `DIABLO2_AUTH` 없이 배포한다. 있으면 마지막 공개 URL 검증만 401 로 실패 표시되지만 배포 자체는 그 전에 끝난다.
 - **정품 데이터는 절대 공개 경로에 두지 않는다.** basic_auth 가 걸린 상태에서만 `/DIABDAT.MPQ` 를 제공한다. 프록시 규칙을 지우거나 열면 저작물 배포가 된다.

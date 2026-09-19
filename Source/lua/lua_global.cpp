@@ -35,6 +35,7 @@
 #include "lua/modules/monsters.hpp"
 #include "lua/modules/player.hpp"
 #include "lua/modules/render.hpp"
+#include "lua/modules/stash.hpp"
 #include "lua/modules/system.hpp"
 #include "lua/modules/towners.hpp"
 #include "options.h"
@@ -313,6 +314,7 @@ void LuaInitialize()
 	    "devilutionx.render", LuaRenderModule(lua),
 	    "devilutionx.towners", LuaTownersModule(lua),
 	    "devilutionx.hellfire", LuaHellfireModule(lua),
+	    "devilutionx.stash", LuaStashModule(lua),
 	    "devilutionx.system", LuaSystemModule(lua),
 	    "devilutionx.floatingnumbers", LuaFloatingNumbersModule(lua),
 	    "devilutionx.message", [](std::string_view text) { EventPlrMsg(text, UiFlags::ColorRed); },

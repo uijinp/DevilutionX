@@ -167,6 +167,8 @@ set(devilutionx_assets
   "lua/mods/Floating Numbers - Damage/init.lua"
   "lua/mods/Floating Numbers - XP/init.lua"
   "lua/mods/XP x5/init.lua"
+  "lua/mods/Gold 10M/init.lua"
+  "lua/mods/Novice Arsenal/init.lua"
   lua/repl_prelude.lua
   plrgfx/warrior/whu/whufm.trn
   plrgfx/warrior/whu/whulm.trn
@@ -206,6 +208,7 @@ set(devilutionx_assets
   txtdata/items/item_prefixes.tsv
   txtdata/items/item_suffixes.tsv
   txtdata/items/itemdat.tsv
+  txtdata/items/novice_arsenal.tsv
   txtdata/items/unique_itemdat.tsv
   txtdata/missiles/misdat.tsv
   txtdata/missiles/missile_sprites.tsv
