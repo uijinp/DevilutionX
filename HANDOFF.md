@@ -36,6 +36,8 @@ diasurgical/devilutionX 를 포크(`uijinp/DevilutionX`, 브랜치 `homeserver-w
 - SDL2 가 `USE_PTHREADS=1` 이라 SharedArrayBuffer 필요 → nginx 에서 COOP/COEP 헤더를 항상 붙인다. 이 헤더가 Cloudflare 를 통과해 공개 URL 에서도 보여야 한다.
 
 ## 주의사항 / 실패한 시도
+- **모드 폴더 이름이 곧 표시 이름이자 INI 키다.** 배율을 바꾸면 폴더도 함께 바꿔야 한다(`XP x5` → `XP x10`). 바꿀 곳은 폴더명, init.lua 주석, `CMake/Assets.cmake`, `Source/options.cpp` 의 DiscoverMods 목록 네 군데다. 이름이 바뀌면 옛 INI 항목은 자동으로 정리되고 모드는 꺼진 상태가 된다.
+- 마을에서 성당까지 클릭으로 걸어가는 헤드리스 검증은 비효율적이다(묘지·소 목장으로 새기 쉽다). 모드 로직은 `test/lua/xp_multiplier_test.lua` 처럼 엔진 대역을 세워 Lua 로 직접 검증하는 편이 빠르고 정확하다.
 - **이 저장소는 CRLF 다.** `.gitattributes` 가 `* -text`, `.editorconfig` 가 `end_of_line = crlf`. 파이썬 등으로 C++ 파일을 다시 쓰면 통째로 LF 가 되어 27줄 변경이 2,231줄 diff 가 된다. 편집 후 `git diff --numstat` 로 확인할 것. Lua 와 TSV 는 LF 가 맞다.
 - **골드를 인벤토리에 다 넣으면 안 된다.** 40칸이 전부 골드가 되면 전리품을 못 줍고, 상점이 "자리 없음"을 내고, 금고 인출 상한이 `RoomForGold()` = 0 이 되어 금고 돈을 꺼낼 수도 없다. 그래서 지갑 몫(25,000)만 넣는다.
 - **`addItem` 은 접사를 굴린다.** `SetupAllItems(onlygood=true)` 를 거치는데, `ItemType::Staff` 는 그 과정에서 주문이 붙으며 `_iMinMag` 가 되살아나 다시 못 드는 아이템이 된다. 그래서 접사 없이 기본 아이템을 주는 `Player:addBaseItem` 을 따로 만들었다. miscId 를 NONE 으로 둬도 막히지 않는다 — 판정은 itemType 이다.

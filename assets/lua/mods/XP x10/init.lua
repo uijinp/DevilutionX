@@ -1,4 +1,4 @@
--- XP x5 — 얻는 경험치를 5배로.
+-- XP x10 — 얻는 경험치를 10배로.
 --
 -- OnPlayerGainExperience 는 경험치가 더해지기 직전에 호출되지만 반환값으로 양을 바꿀 수는 없다.
 -- 그래서 핸들러 안에서 (배율 - 1)배만큼을 한 번 더 준다. 그 호출이 다시 이 이벤트를 부르므로
@@ -8,7 +8,7 @@
 local events = require("devilutionx.events")
 local player = require("devilutionx.player")
 
-local MULTIPLIER = 5
+local MULTIPLIER = 10
 local in_bonus = false
 
 events.OnPlayerGainExperience.add(function(_player, experience)

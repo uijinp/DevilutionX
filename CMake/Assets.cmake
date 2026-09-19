@@ -166,7 +166,7 @@ set(devilutionx_assets
   lua/mods/clock/init.lua
   "lua/mods/Floating Numbers - Damage/init.lua"
   "lua/mods/Floating Numbers - XP/init.lua"
-  "lua/mods/XP x5/init.lua"
+  "lua/mods/XP x10/init.lua"
   "lua/mods/Gold 10M/init.lua"
   "lua/mods/Novice Arsenal/init.lua"
   lua/repl_prelude.lua
